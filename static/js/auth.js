@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('http://localhost:7070/api/auth/login', {
+            const response = await fetch('http://ccrbraga.ddns.net:7070/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

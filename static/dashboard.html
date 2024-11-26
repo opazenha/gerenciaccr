@@ -119,5 +119,58 @@
     <script src="js/pregacoes.js"></script>
     <script src="js/media.js"></script>
     <script src="js/infantil.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('toggleSidebar');
+            const mainContent = document.getElementById('mainContent');
+            let resizeTimer;
+            
+            function isMobile() {
+                return window.innerWidth <= 768;
+            }
+
+            function updateSidebarBehavior() {
+                if (isMobile()) {
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('expanded');
+                } else {
+                    sidebar.classList.remove('active');
+                }
+            }
+
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (isMobile()) {
+                    sidebar.classList.toggle('active');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('expanded');
+                }
+            });
+
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                if (isMobile() && 
+                    sidebar.classList.contains('active') &&
+                    !sidebar.contains(event.target) && 
+                    !toggleBtn.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+
+            // Debounced resize handler to prevent rapid firing
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    updateSidebarBehavior();
+                }, 250);
+            });
+            
+            // Initialize sidebar state
+            updateSidebarBehavior();
+        });
+    </script>
 </body>
 </html>
