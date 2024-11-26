@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscar Mídias - CCR</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
@@ -48,87 +49,10 @@
     </div>
 </div>
 
-<style>
-    .container {
-        padding: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
-        margin-top: 20px;
-    }
-
-    .results {
-        background-color: #1a1a1a;
-        padding: 20px;
-        border-radius: 12px;
-        margin-top: 20px;
-    }
-
-    .results .title {
-        color: #ffffff;
-        margin-bottom: 20px;
-    }
-
-    .media-card {
-        background: #2d2d2d;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .media-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-    }
-
-    .media-thumbnail {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-    }
-
-    .media-info {
-        padding: 15px;
-    }
-
-    .media-title {
-        color: #ffffff;
-        font-size: 1.1em;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-
-    .media-date {
-        color: #888;
-        font-size: 0.9em;
-    }
-
-    .media-posts {
-        margin-top: 12px;
-        color: #e0e0e0;
-    }
-
-    .media-post {
-        background: #363636;
-        padding: 12px;
-        border-radius: 6px;
-        margin-top: 8px;
-    }
-
-    .post-content {
-        font-size: 0.95em;
-        line-height: 1.5;
-    }
-</style>
-
 <script src="https://unpkg.com/phosphor-icons"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 <script src="/static/js/media.js"></script>
+
 </body>
 </html>

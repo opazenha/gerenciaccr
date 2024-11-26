@@ -3,7 +3,7 @@ class InfantilSearch {
         console.log('Initializing InfantilSearch');
         this.form = document.getElementById('infantilSearchForm');
         this.results = document.getElementById('searchResults');
-        this.infantilGrid = document.querySelector('.results-grid');
+        this.infantilGrid = document.querySelector('.grid');
         
         console.log('Form element:', this.form);
         console.log('Results element:', this.results);
@@ -114,48 +114,85 @@ class InfantilSearch {
         }
     }
 
-    displayResults(reports) {
-        console.log('Displaying results:', reports);
+    displayResults(infantilItems) {
+        console.log('Starting displayResults with:', infantilItems);
         
-        if (!this.infantilGrid) {
-            console.error('infantilGrid element not found');
+        // Make sure we have the elements
+        if (!this.results || !this.infantilGrid) {
+            console.error('Missing elements:', {
+                results: this.results,
+                infantilGrid: this.infantilGrid
+            });
             return;
         }
 
-        this.results.style.display = 'block';
+        // Show the results container
+        this.results.classList.remove('hidden');
+        console.log('Removed hidden class from results');
+        
+        // Clear existing content
         this.infantilGrid.innerHTML = '';
+        console.log('Cleared grid content');
 
-        if (!reports || reports.length === 0) {
-            console.log('No results found');
-            this.infantilGrid.innerHTML = '<p class="no-results">Nenhum relatório encontrado.</p>';
+        if (!infantilItems || infantilItems.length === 0) {
+            console.log('No results to display');
+            this.infantilGrid.innerHTML = '<p class="no-results">Nenhum conteúdo infantil encontrado.</p>';
             return;
         }
 
-        reports.forEach(report => {
-            console.log('Creating card for report:', report);
-            const card = this.createReportCard(report);
-            this.infantilGrid.appendChild(card);
+        console.log(`Creating ${infantilItems.length} cards`);
+        infantilItems.forEach((post, index) => {
+            console.log(`Creating card ${index + 1}/${infantilItems.length}:`, post);
+            const infantilCard = this.createReportCard(post);
+            if (infantilCard) {
+                this.infantilGrid.appendChild(infantilCard);
+                console.log(`Added card ${index + 1} to grid`);
+            } else {
+                console.error(`Failed to create card for:`, post);
+            }
         });
+        
+        console.log('Finished displaying results');
     }
 
     createReportCard(report) {
+        console.log('Creating report card:', report);
         const card = document.createElement('div');
         card.className = 'result-card';
         
         // Get YouTube video ID from URL if available
         const videoId = report.url ? this.getYouTubeVideoId(report.url) : null;
         
+        // Format the kids_report if available
+        const formattedReport = report.kids_report ? this.formatMarkdown(report.kids_report) : '';
+        
+        const formattedDate = new Date(report.created_at).toLocaleDateString('pt-BR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
         card.innerHTML = `
-            ${videoId ? `
-                <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" 
-                     alt="Thumbnail" class="result-thumbnail">
-            ` : ''}
-            <div class="result-info">
-                <div class="result-title">${report.title || 'Sem título'}</div>
-                <div class="result-date">${report.created_at}</div>
-                ${report.description ? `
-                    <p class="result-summary">${report.description}</p>
+            <div class="result-card-inner">
+                ${videoId ? `
+                    <div class="result-thumbnail">
+                        <a href="${report.url}" target="_blank">
+                            <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" 
+                                 alt="Thumbnail" class="thumbnail-img">
+                        </a>
+                    </div>
                 ` : ''}
+                <div class="result-info">
+                    <div class="result-date">${formattedDate}</div>
+                    <div class="result-content">
+                        ${formattedReport}
+                    </div>
+                    ${report.url ? `
+                        <a href="${report.url}" target="_blank" class="result-link">Ver no YouTube</a>
+                    ` : ''}
+                </div>
             </div>
         `;
 
@@ -168,8 +205,15 @@ class InfantilSearch {
         // Convert markdown bold to HTML
         text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         
-        // Convert line breaks to <br>
-        text = text.replace(/\n/g, '<br>');
+        // Convert markdown headers
+        text = text.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+        text = text.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+        text = text.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+        
+        // Convert line breaks to <br> and paragraphs
+        text = text.split('\n\n').map(paragraph => 
+            `<p>${paragraph.replace(/\n/g, '<br>')}</p>`
+        ).join('');
         
         return text;
     }

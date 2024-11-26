@@ -2,7 +2,7 @@ class MediaSearch {
     constructor() {
         this.form = document.getElementById('mediaSearchForm');
         this.results = document.getElementById('searchResults');
-        this.mediaGrid = document.querySelector('.results-grid');
+        this.mediaGrid = document.querySelector('.grid');
         this.initializeDatePickers();
         this.attachEventListeners();
     }
@@ -86,47 +86,98 @@ class MediaSearch {
     }
 
     displayResults(mediaItems) {
-        this.results.style.display = 'block';
+        console.log('Starting displayResults with:', mediaItems);
+        
+        // Make sure we have the elements
+        if (!this.results || !this.mediaGrid) {
+            console.error('Missing elements:', {
+                results: this.results,
+                mediaGrid: this.mediaGrid
+            });
+            return;
+        }
+
+        // Show the results container
+        this.results.classList.remove('hidden');
+        console.log('Removed hidden class from results');
+        
+        // Clear existing content
         this.mediaGrid.innerHTML = '';
+        console.log('Cleared grid content');
 
         if (!mediaItems || mediaItems.length === 0) {
+            console.log('No results to display');
             this.mediaGrid.innerHTML = '<p class="no-results">Nenhuma mídia encontrada.</p>';
             return;
         }
 
-        mediaItems.forEach(post => {
+        console.log(`Creating ${mediaItems.length} cards`);
+        mediaItems.forEach((post, index) => {
+            console.log(`Creating card ${index + 1}/${mediaItems.length}:`, post);
             const mediaCard = this.createMediaCard(post);
-            this.mediaGrid.appendChild(mediaCard);
+            if (mediaCard) {
+                this.mediaGrid.appendChild(mediaCard);
+                console.log(`Added card ${index + 1} to grid`);
+            } else {
+                console.error(`Failed to create card for:`, post);
+            }
         });
+        
+        console.log('Finished displaying results');
     }
 
     createMediaCard(media) {
+        console.log('Creating card with media:', media);
         const card = document.createElement('div');
         card.className = 'result-card';
         
         // Get YouTube video ID from URL
         const videoId = this.getYouTubeVideoId(media.url);
+        console.log('Video ID:', videoId);
+        
+        // Handle media_posts content
+        let postsContent = '';
+        if (Array.isArray(media.media_posts)) {
+            postsContent = media.media_posts.map(post => {
+                const text = typeof post === 'object' ? post.text : post;
+                return `<p class="result-post">${text}</p>`;
+            }).join('');
+        } else if (typeof media.media_posts === 'string') {
+            postsContent = `<p class="result-post">${media.media_posts}</p>`;
+        }
+        
+        const formattedDate = new Date(media.created_at).toLocaleDateString('pt-BR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
         
         card.innerHTML = `
-            <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" 
-                 alt="Thumbnail" class="result-thumbnail">
-            <div class="result-info">
-                <div class="result-title">${media.title || 'Sem título'}</div>
-                <div class="result-date">${media.created_at}</div>
-                ${media.description ? `
-                    <p class="result-summary">${media.description}</p>
-                ` : ''}
+            <div class="result-card-inner">
+                <div class="result-thumbnail">
+                    <a href="${media.url}" target="_blank">
+                        <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" 
+                             alt="Thumbnail" class="thumbnail-img">
+                    </a>
+                </div>
+                <div class="result-info">
+                    <div class="result-date">${formattedDate}</div>
+                    <div class="result-content">
+                        ${postsContent}
+                    </div>
+                    <a href="${media.url}" target="_blank" class="result-link">Ver no YouTube</a>
+                </div>
             </div>
         `;
-
+        
         return card;
     }
 
     getYouTubeVideoId(url) {
         if (!url) return '';
-        
-        const regex = /[?&]v=([^&#]*)/;
-        const match = url.match(regex);
+        const match = url.match(/[?&]v=([^&]+)/);
         return match ? match[1] : '';
     }
 }

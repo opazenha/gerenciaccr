@@ -2,7 +2,7 @@ class SermonSearch {
     constructor() {
         this.form = document.getElementById('sermonSearchForm');
         this.results = document.getElementById('searchResults');
-        this.sermonsGrid = document.querySelector('.results-grid');
+        this.sermonsGrid = document.querySelector('.grid');
         this.initializeDatePickers();
         this.attachEventListeners();
     }
@@ -84,18 +84,44 @@ class SermonSearch {
     }
 
     displayResults(sermons) {
-        this.results.style.display = 'block';
+        console.log('Starting displayResults with:', sermons);
+        
+        // Make sure we have the elements
+        if (!this.results || !this.sermonsGrid) {
+            console.error('Missing elements:', {
+                results: this.results,
+                sermonsGrid: this.sermonsGrid
+            });
+            return;
+        }
+
+        // Show the results container
+        this.results.classList.remove('hidden');
+        console.log('Removed hidden class from results');
+        
+        // Clear existing content
         this.sermonsGrid.innerHTML = '';
+        console.log('Cleared grid content');
 
         if (!sermons || sermons.length === 0) {
+            console.log('No results to display');
             this.sermonsGrid.innerHTML = '<p class="no-results">Nenhuma pregação encontrada.</p>';
             return;
         }
 
-        sermons.forEach(sermon => {
+        console.log(`Creating ${sermons.length} cards`);
+        sermons.forEach((sermon, index) => {
+            console.log(`Creating card ${index + 1}/${sermons.length}:`, sermon);
             const sermonCard = this.createSermonCard(sermon);
-            this.sermonsGrid.appendChild(sermonCard);
+            if (sermonCard) {
+                this.sermonsGrid.appendChild(sermonCard);
+                console.log(`Added card ${index + 1} to grid`);
+            } else {
+                console.error(`Failed to create card for:`, sermon);
+            }
         });
+        
+        console.log('Finished displaying results');
     }
 
     createSermonCard(sermon) {

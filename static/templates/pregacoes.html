@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscar Pregações - CCR</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
@@ -24,13 +25,11 @@
             <div class="form-group date-range">
                 <div class="date-input">
                     <label class="label" for="startDate">Data Inicial</label>
-                    <input type="date" id="startDate" name="startDate" class="input" 
-                           lang="pt-BR">
+                    <input type="date" id="startDate" name="startDate" class="input">
                 </div>
                 <div class="date-input">
                     <label class="label" for="endDate">Data Final</label>
-                    <input type="date" id="endDate" name="endDate" class="input" 
-                           lang="pt-BR">
+                    <input type="date" id="endDate" name="endDate" class="input">
                 </div>
             </div>
 
@@ -50,87 +49,10 @@
     </div>
 </div>
 
-<style>
-.results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.results-section {
-    background-color: #1a1a1a;
-    padding: 20px;
-    border-radius: 12px;
-    margin-top: 20px;
-    display: none;
-}
-
-.results-section h3 {
-    color: #ffffff;
-    margin-bottom: 20px;
-}
-
-.sermon-card {
-    background: #2d2d2d;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.sermon-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-}
-
-.sermon-thumbnail {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-}
-
-.sermon-info {
-    padding: 15px;
-}
-
-.sermon-title {
-    color: #ffffff;
-    font-size: 1.1em;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.sermon-date {
-    color: #888;
-    font-size: 0.9em;
-    margin-bottom: 12px;
-}
-
-.sermon-summary {
-    background-color: #363636;
-    padding: 15px;
-    border-radius: 6px;
-    margin-top: 10px;
-}
-
-.summary-content {
-    color: #e0e0e0;
-    font-size: 0.95em;
-    line-height: 1.5;
-}
-
-.sermon-error {
-    color: #ff6b6b;
-    background-color: #363636;
-    padding: 10px;
-    border-radius: 6px;
-    margin-top: 10px;
-}
-</style>
-
 <script src="https://unpkg.com/phosphor-icons"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 <script src="/static/js/pregacoes.js"></script>
+
 </body>
 </html>
