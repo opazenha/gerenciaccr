@@ -1,0 +1,114 @@
+<div class="reservas-container">
+    <!-- Layout Image Section -->
+    <div class="layout-section">
+        <div class="layout-reference">
+            <img src="/images/layout.png" alt="Layout da Igreja" class="layout-image">
+        </div>
+    </div>
+    
+    <!-- Form and Calendar Section -->
+    <div class="form-calendar-section">
+        <!-- Form Section -->
+        <div class="form-section">
+            <form id="reservationForm" class="reservation-form">
+                <h2>Nova Reserva de Espaço</h2>
+                
+                <div class="form-group">
+                    <label for="location">Local</label>
+                    <select id="location" name="location" required>
+                        <option value="">Selecione um local</option>
+                        <option value="templo">Templo</option>
+                        <option value="corredor">Corredor</option>
+                        <option value="sala1">Sala 1</option>
+                        <option value="sala2">Sala 2</option>
+                        <option value="sala3">Sala 3</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Data</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="date" name="date" required readonly>
+                        <i class="ph ph-calendar input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startTime">Hora Início</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="startTime" name="startTime" required readonly>
+                            <i class="ph ph-clock input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="endTime">Hora Fim</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="endTime" name="endTime" required readonly>
+                            <i class="ph ph-clock input-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descrição do Evento</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Descreva brevemente o evento" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email para Contato</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <button type="submit" class="btn-submit">Solicitar Reserva</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Submission Result Section -->
+    <div id="submissionResult" class="submission-result" style="display: none;">
+        <div class="result-content">
+            <h3 class="result-title"></h3>
+            <p class="result-message"></p>
+            <div id="conflictingReservations" class="table-responsive" style="display: none;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Local</th>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Responsável</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody id="conflictTableBody">
+                        <!-- Conflicting reservations will be added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reservations List Section -->
+    <div class="upcoming-reservations">
+        <h3>Próximas Reservas</h3>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Local</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Responsável</th>
+                        <th>Descrição</th>
+                    </tr>
+                </thead>
+                <tbody id="reservationsTableBody">
+                    <!-- Reservations will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</div>
