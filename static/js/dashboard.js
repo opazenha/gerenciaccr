@@ -9,6 +9,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggleSidebar');
     const mainContent = document.getElementById('mainContent');
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const contentArea = document.getElementById('contentArea');
+
+    // Show welcome message and hide content area by default
+    if (welcomeMessage && contentArea) {
+        welcomeMessage.style.display = 'block';
+        contentArea.style.display = 'none';
+    }
 
     toggleBtn.addEventListener('click', () => {
         sidebar.classList.toggle('collapsed');
@@ -39,7 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch(templatePath);
             const html = await response.text();
-            mainContent.innerHTML = html;
+            
+            // Hide welcome message and show content area
+            if (welcomeMessage && contentArea) {
+                welcomeMessage.style.display = 'none';
+                contentArea.style.display = 'block';
+                contentArea.innerHTML = html;
+            } else {
+                mainContent.innerHTML = html;
+            }
 
             // Initialize specific components based on the loaded template
             if (templatePath.includes('reservas.html')) {
@@ -55,7 +71,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error loading template:', error);
-            mainContent.innerHTML = '<p class="error">Error loading content</p>';
+            if (contentArea) {
+                contentArea.innerHTML = '<p class="error">Error loading content</p>';
+            } else {
+                mainContent.innerHTML = '<p class="error">Error loading content</p>';
+            }
         }
     }
 
@@ -64,10 +84,4 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.removeItem('token');
         window.location.href = '/';
     });
-
-    // Load default content (Reservas)
-    const defaultNav = document.querySelector('[href="#reservas"]');
-    if (defaultNav) {
-        defaultNav.click();
-    }
 });

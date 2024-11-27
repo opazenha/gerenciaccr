@@ -16,9 +16,15 @@ def create_app():
     # CORS Configuration
     CORS(app, resources={
         r"/api/*": {
-            "origins": ["http://localhost:5050"],
-            "methods": ["GET", "POST", "PUT", "DELETE"],
-            "allow_headers": ["Content-Type", "Authorization"]
+            "origins": [
+                "http://localhost:7070",  # Development
+                "http://localhost:5050",  # Alternative development port
+                "http://ccrbraga.ddns.net"  # Production
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "expose_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
         }
     })
     

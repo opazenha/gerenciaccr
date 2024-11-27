@@ -42,3 +42,6 @@ media/videos/*
 media/transcripts/*
 !media/videos/.gitkeep
 !media/transcripts/.gitkeep
+
+credentials.json
+token.pickle

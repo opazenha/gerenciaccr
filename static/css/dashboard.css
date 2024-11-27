@@ -396,6 +396,62 @@ body {
     color: var(--text-white) !important;
 }
 
+/* Welcome Message Styles */
+.welcome-container {
+    text-align: center;
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 800px;
+    background-color: var(--surface-dark);
+    border-radius: 8px;
+    border: 1px solid var(--border-dark);
+    box-shadow: var(--box-shadow);
+}
+
+.welcome-container h1 {
+    color: var(--text-white);
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    font-family: var(--font-family);
+    font-weight: 600;
+}
+
+.welcome-container p {
+    color: var(--text-gray-light);
+    font-size: 1.1rem;
+    font-family: var(--font-family);
+    line-height: 1.5;
+}
+
+/* Processing Message Styles */
+.processing-message {
+    margin: 2rem auto;
+    max-width: 800px;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.alert-info {
+    background-color: var(--surface-dark);
+    border: 1px solid var(--primary-color);
+    color: var(--text-white);
+}
+
+.alert-danger {
+    background-color: var(--surface-dark);
+    border: 1px solid var(--danger-color);
+    color: var(--text-white);
+}
+
+.alert p {
+    margin: 0;
+    line-height: 1.5;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 768px) {
     :root {

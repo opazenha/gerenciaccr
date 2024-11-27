@@ -70,46 +70,12 @@
 
         <!-- Main Content -->
         <main class="main-content" id="mainContent">
-            <header class="content-header">
-                <h1>Dashboard</h1>
-                <div class="header-actions">
-                    <button class="notifications-btn">
-                        <i class="ph ph-bell"></i>
-                    </button>
-                </div>
-            </header>
-
-            <div class="content-body">
-                <!-- Content will be dynamically loaded here -->
-                <div class="welcome-message">
-                    <h2>Bem-vindo ao Sistema de Gerenciamento</h2>
-                    <p>Selecione uma opção no menu para começar.</p>
-                </div>
-                <div class="mt-5">
-                    <h3>Próximas Reservas</h3>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Local</th>
-                                    <th>Início</th>
-                                    <th>Fim</th>
-                                    <th>Email</th>
-                                    <th>Descrição</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reservationsTableBody">
-                                <!-- Reservations will be populated here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div id="mediaContent">
-                    <!-- Media content will be loaded here -->
-                </div>
+            <!-- Welcome message (default view) -->
+            <div id="welcomeMessage" class="welcome-container">
+                <h1>Bem-vindo ao Sistema de Gerenciamento</h1>
+                <p>Por favor, selecione uma opção no menu lateral para começar.</p>
             </div>
+            <div id="contentArea"></div>
         </main>
     </div>
 
@@ -170,6 +136,41 @@
             
             // Initialize sidebar state
             updateSidebarBehavior();
+        });
+
+        // Function to handle content loading
+        async function loadContent(templateUrl) {
+            const contentArea = document.getElementById('contentArea');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            
+            try {
+                const response = await fetch(templateUrl);
+                const content = await response.text();
+                welcomeMessage.style.display = 'none';
+                contentArea.innerHTML = content;
+                contentArea.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading content:', error);
+            }
+        }
+
+        // Modify the existing click event listener for nav items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const templateUrl = e.currentTarget.getAttribute('data-template');
+                await loadContent(templateUrl);
+                
+                // Update active state
+                document.querySelectorAll('.nav-item').forEach(navItem => {
+                    navItem.classList.remove('active');
+                });
+                e.currentTarget.classList.add('active');
+                
+                if (isMobile()) {
+                    sidebar.classList.remove('active');
+                }
+            });
         });
     </script>
 </body>
