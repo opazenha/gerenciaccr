@@ -133,6 +133,8 @@ class Calendar {
 class ReservationForm {
     constructor() {
         this.form = document.getElementById('reservationForm');
+        this.baseUrl = 'https://sterling-jolly-sailfish.ngrok-free.app';
+        console.log('API Base URL:', this.baseUrl); // Debug log
         this.initializeFlatpickr();
         this.attachEventListeners();
         this.loadUpcomingReservations();
@@ -206,18 +208,16 @@ class ReservationForm {
 
             try {
                 const response = await this.submitReservation(reservation);
+                this.showSubmissionResult(response);
                 if (response.status === 'success') {
-                    this.showSubmissionResult(response);
                     this.form.reset();
                     this.loadUpcomingReservations(); // Refresh the reservations list
-                } else {
-                    this.showSubmissionResult(response);
                 }
             } catch (error) {
                 console.error('Error submitting reservation:', error);
                 this.showSubmissionResult({
                     status: 'error',
-                    message: 'Erro ao solicitar reserva. Por favor, tente novamente.'
+                    message: error.message || 'Erro ao solicitar reserva. Por favor, tente novamente.'
                 });
             }
         });
@@ -268,23 +268,40 @@ class ReservationForm {
             return;
         }
 
-        const response = await fetch('/api/reservations', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(reservation)
-        });
+        const url = `${this.baseUrl}/api/reservations`;
+        console.log('Submitting to URL:', url); // Debug log
+        
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(reservation),
+                credentials: 'include',
+                redirect: 'follow',
+                mode: 'cors'
+            });
 
-        if (response.status === 401) {
-            localStorage.removeItem('token');
-            window.location.href = '/';
-            return;
+            console.log('Response status:', response.status); // Debug log
+            console.log('Response headers:', [...response.headers]); // Debug log
+
+            const responseData = await response.json();
+            console.log('Response data:', responseData); // Debug log
+
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/';
+                throw new Error('Unauthorized');
+            }
+
+            return responseData; // Return the response data regardless of status
+        } catch (error) {
+            console.error('Error submitting reservation:', error);
+            throw new Error('Failed to submit reservation. Please check your connection and try again.');
         }
-
-        const data = await response.json();
-        return data;
     }
 
     showSubmissionResult(data) {
@@ -293,27 +310,35 @@ class ReservationForm {
         const messageEl = resultDiv.querySelector('.result-message');
         const conflictingDiv = document.getElementById('conflictingReservations');
         
+        console.log('Showing submission result:', data); // Debug log
+        
         // Reset previous state
         resultDiv.classList.remove('success', 'error');
         titleEl.classList.remove('success', 'error');
+        conflictingDiv.style.display = 'none';
         
         if (data.status === 'success') {
             resultDiv.classList.add('success');
             titleEl.classList.add('success');
             titleEl.textContent = 'Reserva Confirmada';
             messageEl.textContent = 'Sua reserva foi registrada com sucesso!';
-            conflictingDiv.style.display = 'none';
         } else {
             resultDiv.classList.add('error');
             titleEl.classList.add('error');
             titleEl.textContent = 'Erro na Reserva';
-            messageEl.textContent = data.message || 'Ocorreu um erro ao processar sua reserva.';
             
+            // Set the error message
+            if (data.message) {
+                messageEl.textContent = data.message;
+            } else {
+                messageEl.textContent = 'Erro ao solicitar reserva. Por favor, tente novamente.';
+            }
+            
+            // Handle conflict display
             if (data.conflict) {
+                console.log('Displaying conflict:', data.conflict); // Debug log
                 this.displayConflictingReservations([data.conflict]);
                 conflictingDiv.style.display = 'block';
-            } else {
-                conflictingDiv.style.display = 'none';
             }
         }
         
@@ -350,16 +375,22 @@ class ReservationForm {
         endDate.setDate(endDate.getDate() + 14); // Next 2 weeks
 
         try {
-            const response = await fetch(`/api/reservations/range?start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`, {
+            const response = await fetch(`${this.baseUrl}/api/reservations/range?start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                credentials: 'include'
             });
 
-            if (response.status === 401) {
-                localStorage.removeItem('token');
-                window.location.href = '/';
-                return;
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/';
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();

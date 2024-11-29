@@ -1,3 +1,5 @@
+const baseUrl = window.location.protocol === 'https:' ? 'https://sterling-jolly-sailfish.ngrok-free.app' : '';
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
 
@@ -15,13 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('http://ccrbraga.ddns.net/api/auth/login', {
+            const response = await fetch(`${baseUrl}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({ email, password }),
+                credentials: 'include'
             });
 
             const data = await response.json();
@@ -30,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showSuccess(loginForm, 'Login realizado com sucesso!');
                 localStorage.setItem('token', data.token);
                 setTimeout(() => {
-                    window.location.href = '/static/dashboard.html';
+                    window.location.href = `${baseUrl}/static/dashboard.html`;
                 }, 1500);
             } else {
                 showError(loginForm, data.message || 'Erro ao fazer login');
@@ -63,16 +66,3 @@ document.addEventListener('DOMContentLoaded', () => {
         messages.forEach(msg => msg.remove());
     }
 });
-
-// Note: Register API endpoint still available at http://localhost:7070/api/auth/register
-// Example usage:
-/*
-POST http://localhost:7070/api/auth/register
-Content-Type: application/json
-
-{
-    "name": "User Name",
-    "email": "user@example.com",
-    "password": "password123"
-}
-*/

@@ -13,13 +13,17 @@ def create_app():
     app = Flask(__name__, static_folder='../static')
     app.debug = True
     
+    # URL trailing slash configuration
+    app.url_map.strict_slashes = False
+    
     # CORS Configuration
     CORS(app, resources={
         r"/api/*": {
             "origins": [
                 "http://localhost:7070",  # Development
                 "http://localhost:5050",  # Alternative development port
-                "http://ccrbraga.ddns.net"  # Production
+                "http://ccrbraga.ddns.net",  # Production
+                "https://sterling-jolly-sailfish.ngrok-free.app"  # Ngrok HTTPS URL
             ],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
