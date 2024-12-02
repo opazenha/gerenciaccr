@@ -117,7 +117,7 @@ def process_video_task(url, user, video_title, services_collection, option):
 
         # Transcribe video
         print("Step 2/4: Transcribing video...")
-        model = whisper.load_model("tiny")
+        model = whisper.load_model("medium")
 
         result = model.transcribe(
             audio_path,
