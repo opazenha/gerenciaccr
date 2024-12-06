@@ -72,6 +72,34 @@ python run.py
 - `/api/reservations`: Reservation management
 - `/api/video`: Video processing endpoints
 
+## Testing
+
+The project uses pytest for testing. To run the tests:
+
+1. Install test dependencies:
+```bash
+pip install pytest pytest-cov
+```
+
+2. Run the tests:
+```bash
+pytest
+```
+
+3. To run tests with coverage report:
+```bash
+pytest --cov=src tests/
+```
+
+### Test Structure
+
+- `tests/conftest.py`: Contains pytest fixtures used across tests
+- `tests/web/`: Tests for web-related functionality
+  - `test_app.py`: Tests for app configuration
+  - `test_routes.py`: Tests for web routes
+- `tests/crews/`: Tests for AI crew functionality
+  - `test_crew.py`: Tests for GerenciaCrews class
+
 ## Development
 
 The application is built using:

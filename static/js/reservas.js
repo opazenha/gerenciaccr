@@ -133,7 +133,7 @@ class Calendar {
 class ReservationForm {
     constructor() {
         this.form = document.getElementById('reservationForm');
-        this.baseUrl = 'https://sterling-jolly-sailfish.ngrok-free.app';
+        this.baseUrl = window.location.protocol === 'https:' ? 'https://sterling-jolly-sailfish.ngrok-free.app' : 'http://localhost:7770';
         console.log('API Base URL:', this.baseUrl); // Debug log
         this.initializeFlatpickr();
         this.attachEventListeners();
@@ -198,12 +198,11 @@ class ReservationForm {
 
             const formData = new FormData(this.form);
             const reservation = {
-                location: formData.get('location'),
+                title: formData.get('location'),
                 date: formData.get('date'),
-                startTime: formData.get('startTime'),
-                endTime: formData.get('endTime'),
-                description: formData.get('description'),
-                email: formData.get('email')
+                start_time: formData.get('startTime'),
+                end_time: formData.get('endTime'),
+                description: formData.get('description')
             };
 
             try {
@@ -321,23 +320,17 @@ class ReservationForm {
             resultDiv.classList.add('success');
             titleEl.classList.add('success');
             titleEl.textContent = 'Reserva Confirmada';
-            messageEl.textContent = 'Sua reserva foi registrada com sucesso!';
+            messageEl.textContent = data.message || 'Sua reserva foi registrada com sucesso!';
         } else {
             resultDiv.classList.add('error');
             titleEl.classList.add('error');
             titleEl.textContent = 'Erro na Reserva';
-            
-            // Set the error message
-            if (data.message) {
-                messageEl.textContent = data.message;
-            } else {
-                messageEl.textContent = 'Erro ao solicitar reserva. Por favor, tente novamente.';
-            }
+            messageEl.textContent = data.message || 'Erro ao solicitar reserva. Por favor, tente novamente.';
             
             // Handle conflict display
-            if (data.conflict) {
-                console.log('Displaying conflict:', data.conflict); // Debug log
-                this.displayConflictingReservations([data.conflict]);
+            if (data.conflicts && data.conflicts.length > 0) {
+                console.log('Displaying conflicts:', data.conflicts); // Debug log
+                this.displayConflictingReservations(data.conflicts);
                 conflictingDiv.style.display = 'block';
             }
         }
@@ -348,15 +341,21 @@ class ReservationForm {
 
     displayConflictingReservations(conflicts) {
         const tbody = document.getElementById('conflictTableBody');
+        if (!tbody) {
+            console.error('Could not find conflict table body');
+            return;
+        }
+        
         tbody.innerHTML = '';
+        console.log('Processing conflicts:', conflicts); // Debug log
 
         conflicts.forEach(reservation => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${reservation.location || 'N/A'}</td>
+                <td>${reservation.title || 'N/A'}</td>
                 <td>${reservation.date}</td>
-                <td>${reservation.startTime} - ${reservation.endTime}</td>
-                <td>${reservation.responsible || 'N/A'}</td>
+                <td>${reservation.start_time} - ${reservation.end_time}</td>
+                <td>${reservation.user_id || 'N/A'}</td>
                 <td>${reservation.description || 'N/A'}</td>
             `;
             tbody.appendChild(row);
@@ -394,31 +393,41 @@ class ReservationForm {
             }
 
             const data = await response.json();
-            if (data.status === 'success') {
+            console.log('Received reservations:', data); // Debug log
+            
+            if (data.status === 'success' && Array.isArray(data.reservations)) {
                 this.displayReservations(data.reservations);
+            } else {
+                console.error('Invalid response format:', data);
+                this.displayReservations([]);
             }
         } catch (error) {
             console.error('Error loading reservations:', error);
+            this.displayReservations([]);
         }
     }
 
     displayReservations(reservations) {
         const tbody = document.getElementById('reservationsTableBody');
+        if (!tbody) {
+            console.error('Could not find reservations table body');
+            return;
+        }
+
         tbody.innerHTML = '';
-
-        reservations.forEach(reservation => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${reservation.location || 'N/A'}</td>
-                <td>${reservation.date}</td>
-                <td>${reservation.startTime} - ${reservation.endTime}</td>
-                <td>${reservation.responsible || 'N/A'}</td>
-                <td>${reservation.description || 'N/A'}</td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        if (reservations.length === 0) {
+        if (reservations && reservations.length > 0) {
+            reservations.forEach(reservation => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${reservation.title || 'N/A'}</td>
+                    <td>${reservation.date}</td>
+                    <td>${reservation.start_time} - ${reservation.end_time}</td>
+                    <td>-</td>
+                    <td>${reservation.description || 'N/A'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        } else {
             const row = document.createElement('tr');
             row.innerHTML = '<td colspan="5" class="text-center">Nenhuma reserva encontrada</td>';
             tbody.appendChild(row);

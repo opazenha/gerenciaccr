@@ -99,6 +99,9 @@ def process_video_task(url, user, video_title, services_collection, option):
                 'preferredquality': '192',
             }],
             'outtmpl': 'downloads/%(id)s.%(ext)s',
+            'quiet': True,
+            'no_warnings': True,
+            'progress': False
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -113,6 +116,11 @@ def process_video_task(url, user, video_title, services_collection, option):
         # Using -t for duration instead of -to for end time
         command = f"ffmpeg -i {audio_path} -ss {start_time} -c copy {trimmed_audio_path}"
         subprocess.call(command, shell=True)
+        
+        # Clean up original audio file
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+            
         audio_path = trimmed_audio_path
 
         # Transcribe video
@@ -129,9 +137,13 @@ def process_video_task(url, user, video_title, services_collection, option):
         transcription = result["text"]
 
         # Clean up audio files
-        os.remove(audio_path)
-        if os.path.exists(f"downloads/{video_id}.mp3"):
-            os.remove(f"downloads/{video_id}.mp3")
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+        
+        # Clean up any partial downloads
+        for f in os.listdir('downloads'):
+            if f.endswith('.part') or f.endswith('.ytdl'):
+                os.remove(os.path.join('downloads', f))
 
         # Process content
         print("Step 3/4: Processing content...")

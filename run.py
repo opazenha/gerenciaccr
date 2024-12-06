@@ -1,6 +1,4 @@
-from app import create_app
-
-app = create_app()
+from src.gerencia_ccr.web.app import app
 
 if __name__ == "__main__":
-    app.run(debug=True, port=7070, host='0.0.0.0')
+    app.run(debug=True, port=7770, host='0.0.0.0')

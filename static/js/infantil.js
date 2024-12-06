@@ -1,3 +1,8 @@
+// Use existing baseUrl from auth.js if available, otherwise define it
+if (typeof baseUrl === 'undefined') {
+    var baseUrl = window.location.protocol === 'https:' ? 'https://sterling-jolly-sailfish.ngrok-free.app' : 'http://localhost:7770';
+}
+
 class InfantilSearch {
     constructor() {
         console.log('Initializing InfantilSearch');
@@ -107,7 +112,7 @@ class InfantilSearch {
                 throw new Error(data.message || 'Error searching infantil reports');
             }
 
-            return data.results;
+            return data.data;
         } catch (error) {
             console.error('API request error:', error);
             throw error;

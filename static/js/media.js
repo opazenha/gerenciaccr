@@ -1,3 +1,8 @@
+// Use existing baseUrl from auth.js if available, otherwise define it
+if (typeof baseUrl === 'undefined') {
+    var baseUrl = window.location.protocol === 'https:' ? 'https://sterling-jolly-sailfish.ngrok-free.app' : 'http://localhost:7770';
+}
+
 class MediaSearch {
     constructor() {
         this.form = document.getElementById('mediaSearchForm');
@@ -78,11 +83,11 @@ class MediaSearch {
         }
 
         const data = await response.json();
-        if (data.status !== 'success') {
-            throw new Error(data.message || 'Error searching media');
+        if (data.status === 'error') {
+            throw new Error(data.message || 'Error searching media reports');
         }
 
-        return data.media_posts;
+        return data.data;
     }
 
     displayResults(mediaItems) {

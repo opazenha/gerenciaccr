@@ -1,4 +1,4 @@
-const baseUrl = window.location.protocol === 'https:' ? 'https://sterling-jolly-sailfish.ngrok-free.app' : '';
+const baseUrl = window.location.protocol === 'https:' ? 'https://sterling-jolly-sailfish.ngrok-free.app' : 'http://localhost:7770';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -27,20 +27,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 credentials: 'include'
             });
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Login failed');
+            }
+
             const data = await response.json();
 
-            if (response.ok) {
-                showSuccess(loginForm, 'Login realizado com sucesso!');
-                localStorage.setItem('token', data.token);
-                setTimeout(() => {
-                    window.location.href = `${baseUrl}/static/dashboard.html`;
-                }, 1500);
-            } else {
-                showError(loginForm, data.message || 'Erro ao fazer login');
-            }
+            showSuccess(loginForm, 'Login realizado com sucesso!');
+            localStorage.setItem('token', data.token);
+            setTimeout(() => {
+                window.location.href = '/static/dashboard.html';
+            }, 1500);
         } catch (error) {
             console.error('Error:', error);
-            showError(loginForm, 'Erro ao conectar ao servidor');
+            showError(loginForm, error.message || 'Erro ao fazer login');
         }
     });
 

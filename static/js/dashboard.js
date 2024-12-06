@@ -18,10 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
         contentArea.style.display = 'none';
     }
 
-    toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('expanded');
-    });
+    if (toggleBtn && sidebar && mainContent) {
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        });
+    }
 
     // Handle navigation
     const navItems = document.querySelectorAll('.nav-item');
@@ -30,10 +32,12 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             // Remove active class from all items
-            navItems.forEach(navItem => navItem.classList.remove('active'));
+            navItems.forEach(navItem => {
+                if (navItem) navItem.classList.remove('active');
+            });
             
             // Add active class to clicked item
-            item.classList.add('active');
+            if (item) item.classList.add('active');
 
             // Get template path from data attribute
             const templatePath = item.getAttribute('data-template');
@@ -53,35 +57,66 @@ document.addEventListener('DOMContentLoaded', function() {
                 welcomeMessage.style.display = 'none';
                 contentArea.style.display = 'block';
                 contentArea.innerHTML = html;
-            } else {
+            } else if (mainContent) {
                 mainContent.innerHTML = html;
             }
 
-            // Initialize specific components based on the loaded template
+            // Load required script based on template
+            let scriptPath = null;
             if (templatePath.includes('reservas.html')) {
-                new ReservationForm();
+                scriptPath = '/static/js/reservas.js';
             } else if (templatePath.includes('video.html')) {
-                new VideoProcessor();
+                scriptPath = '/static/js/video.js';
             } else if (templatePath.includes('pregacoes.html')) {
-                new SermonSearch();
+                scriptPath = '/static/js/pregacoes.js';
             } else if (templatePath.includes('media.html')) {
-                new MediaSearch();
+                scriptPath = '/static/js/media.js';
             } else if (templatePath.includes('infantil.html')) {
-                new InfantilSearch();
+                scriptPath = '/static/js/infantil.js';
+            }
+
+            if (scriptPath) {
+                // Remove any existing script
+                const existingScript = document.querySelector(`script[src="${scriptPath}"]`);
+                if (existingScript) {
+                    existingScript.remove();
+                }
+
+                // Load and execute the new script
+                const script = document.createElement('script');
+                script.src = scriptPath;
+                script.onload = () => {
+                    // Initialize component after script is loaded
+                    if (templatePath.includes('reservas.html')) {
+                        new ReservationForm();
+                    } else if (templatePath.includes('video.html')) {
+                        new VideoProcessor();
+                    } else if (templatePath.includes('pregacoes.html')) {
+                        new SermonSearch();
+                    } else if (templatePath.includes('media.html')) {
+                        new MediaSearch();
+                    } else if (templatePath.includes('infantil.html')) {
+                        new InfantilSearch();
+                    }
+                };
+                document.body.appendChild(script);
             }
         } catch (error) {
             console.error('Error loading template:', error);
             if (contentArea) {
                 contentArea.innerHTML = '<p class="error">Error loading content</p>';
-            } else {
+            } else if (mainContent) {
                 mainContent.innerHTML = '<p class="error">Error loading content</p>';
             }
         }
     }
 
     // Handle logout
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('token');
-        window.location.href = '/';
-    });
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        });
+    }
 });

@@ -1,3 +1,8 @@
+// Use existing baseUrl from auth.js if available, otherwise define it
+if (typeof baseUrl === 'undefined') {
+    var baseUrl = window.location.protocol === 'https:' ? 'https://sterling-jolly-sailfish.ngrok-free.app' : 'http://localhost:7770';
+}
+
 class VideoProcessor {
     constructor() {
         this.form = document.getElementById('videoProcessForm');

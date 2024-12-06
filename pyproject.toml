@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gerencia_ccr"
+version = "0.1.0"
+description = "CCR Management System"
+requires-python = ">=3.8"
+dependencies = [
+    "flask",
+    "flask-cors",
+    "flask-jwt-extended",
+    "pymongo",
+    "python-dotenv",
+    "crewai",
+    "bcrypt",
+    "openai",
+    "google-auth-oauthlib",
+    "google-auth-httplib2",
+    "google-api-python-client"
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
