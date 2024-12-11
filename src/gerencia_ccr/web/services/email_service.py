@@ -21,49 +21,67 @@ def get_gmail_service():
     # The file token.pickle stores the user's access and refresh tokens
     if os.path.exists('token.pickle'):
         logger.debug("Found existing token.pickle file")
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
-            logger.debug("Loaded credentials from token.pickle")
-    else:
-        logger.debug("No token.pickle file found")
+        try:
+            with open('token.pickle', 'rb') as token:
+                creds = pickle.load(token)
+                logger.debug("Loaded credentials from token.pickle")
+        except Exception as e:
+            logger.warning(f"Error loading token.pickle: {e}")
+            creds = None
+            # Delete corrupted token file
+            os.remove('token.pickle')
     
     # If credentials are not valid or don't exist
     if not creds or not creds.valid:
         logger.debug("Credentials are invalid or missing")
-        if creds and creds.expired and creds.refresh_token:
-            logger.debug("Refreshing expired credentials")
-            creds.refresh(Request())
-        else:
-            logger.debug("Initiating OAuth2 flow")
-            if not os.path.exists('credentials.json'):
-                logger.error("credentials.json file not found!")
-                raise FileNotFoundError("credentials.json is required for Gmail authentication")
+        try:
+            if creds and creds.expired and creds.refresh_token:
+                logger.debug("Attempting to refresh expired credentials")
+                try:
+                    creds.refresh(Request())
+                    logger.debug("Successfully refreshed credentials")
+                except Exception as refresh_error:
+                    logger.warning(f"Failed to refresh token: {refresh_error}")
+                    creds = None
+                    # Delete invalid token file
+                    if os.path.exists('token.pickle'):
+                        os.remove('token.pickle')
             
-            # Configure the OAuth flow
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', 
-                SCOPES,
-                redirect_uri='http://ccrbraga.ddns.net'  # Production redirect URI
-            )
+            if not creds:
+                logger.debug("Initiating new OAuth2 flow")
+                if not os.path.exists('credentials.json'):
+                    logger.error("credentials.json file not found!")
+                    raise FileNotFoundError("credentials.json is required for Gmail authentication")
+                
+                # Configure the OAuth flow
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    'credentials.json', 
+                    SCOPES,
+                    redirect_uri='http://ccrbraga.ddns.net'  # Production redirect URI
+                )
+                
+                # For local development, uncomment this line and comment the production one above
+                # flow = InstalledAppFlow.from_client_secrets_file(
+                #     'credentials.json', 
+                #     SCOPES,
+                #     redirect_uri='http://localhost:8080'
+                # )
+                
+                creds = flow.run_local_server(
+                    port=8080,
+                    success_message='The authentication flow has completed. You may close this window.',
+                    open_browser=True
+                )
+                logger.debug("OAuth2 flow completed successfully")
             
-            # For local development, uncomment this line and comment the production one above
-            # flow = InstalledAppFlow.from_client_secrets_file(
-            #     'credentials.json', 
-            #     SCOPES,
-            #     redirect_uri='http://localhost:8080'
-            # )
-            
-            creds = flow.run_local_server(
-                port=8080,
-                success_message='The authentication flow has completed. You may close this window.',
-                open_browser=True
-            )
-            logger.debug("OAuth2 flow completed successfully")
-        
-        # Save the credentials for the next run
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
-            logger.debug("Saved new credentials to token.pickle")
+            # Save the credentials for the next run
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
+                logger.debug("Saved new credentials to token.pickle")
+                
+        except Exception as e:
+            logger.error(f"Error during authentication process: {e}")
+            raise
 
     logger.debug("Gmail service initialization completed")
     return build('gmail', 'v1', credentials=creds)
@@ -111,6 +129,38 @@ def send_completion_email(to_email, video_url):
         
     except Exception as e:
         logger.error(f"Error sending email: {str(e)}", exc_info=True)
+        return False
+
+def send_markdown_email(to_email, markdown_content, subject="Novos Posts Gerados"):
+    try:
+        logger.debug(f"Preparing to send markdown email to: {to_email}")
+        
+        service = get_gmail_service()
+        logger.debug("Gmail service obtained successfully")
+        
+        # Create email message
+        message = MIMEText(markdown_content)
+        message['to'] = to_email
+        message['subject'] = subject
+        logger.debug("Email message created with subject and recipient")
+        
+        # Encode the message
+        raw = base64.urlsafe_b64encode(message.as_bytes())
+        raw = raw.decode()
+        logger.debug("Email message encoded successfully")
+        
+        # Send the email
+        logger.debug("Attempting to send email...")
+        send_result = service.users().messages().send(
+            userId='me',
+            body={'raw': raw}
+        ).execute()
+        
+        logger.debug(f"Email sent successfully. Message ID: {send_result.get('id', 'unknown')}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error sending markdown email: {str(e)}", exc_info=True)
         return False
 
 # Add a test function for debugging

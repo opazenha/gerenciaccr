@@ -3,9 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscar Mídias - CCR</title>
+    <title>Mídia - Comunidade Cristã Renovada</title>
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
+    
+    <!-- External libraries - Load these before our custom scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    
+    <style>
+        .post-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .markdown-content {
+            line-height: 1.6;
+            font-size: 16px;
+            color: #333;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .markdown-content h1, 
+        .markdown-content h2, 
+        .markdown-content h3, 
+        .markdown-content h4 {
+            color: #2c3e50;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .markdown-content h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        .markdown-content h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        .markdown-content h3 { font-size: 1.25em; }
+        .markdown-content h4 { font-size: 1em; }
+
+        .markdown-content p {
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+            padding-left: 2em;
+            margin-bottom: 16px;
+        }
+
+        .markdown-content li {
+            margin: 0.25em 0;
+        }
+
+        .markdown-content code {
+            background-color: rgba(27,31,35,0.05);
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 85%;
+            margin: 0;
+            padding: 0.2em 0.4em;
+        }
+
+        .markdown-content pre {
+            background-color: #f6f8fa;
+            border-radius: 3px;
+            font-size: 85%;
+            line-height: 1.45;
+            overflow: auto;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .markdown-content blockquote {
+            border-left: 0.25em solid #dfe2e5;
+            color: #6a737d;
+            padding: 0 1em;
+            margin: 0 0 16px;
+        }
+
+        .markdown-content strong {
+            font-weight: 600;
+        }
+
+        .markdown-content em {
+            font-style: italic;
+        }
+
+        .markdown-content hr {
+            height: 0.25em;
+            padding: 0;
+            margin: 24px 0;
+            background-color: #e1e4e8;
+            border: 0;
+        }
+
+        .post-type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .post-type-badge.story {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .post-type-badge.post {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .error-message {
+            color: #dc3545;
+            padding: 1rem;
+            background: #fdf2f2;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .loading-spinner {
+            color: #666;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .post-title {
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+
+        .post-title h3 {
+            color: #333;
+            margin: 0;
+        }
+
+        .slide {
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            padding: 15px;
+        }
+
+        .slide h4 {
+            color: #666;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .slide-content {
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .visual-style {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #eef2f7;
+            border-radius: 4px;
+        }
+
+        .interactive {
+            background: #e8f4ff;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .post-content {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: #333;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .post-content h1, 
+        .post-content h2, 
+        .post-content h3, 
+        .post-content h4 {
+            color: #1a1a1a;
+            margin-top: 1.5em;
+            margin-bottom: 0.75em;
+            font-weight: 600;
+        }
+        
+        .post-content p {
+            margin-bottom: 1em;
+            color: #333;
+        }
+        
+        .post-content ul, 
+        .post-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1em;
+            color: #333;
+        }
+        
+        .post-content li {
+            margin-bottom: 0.5em;
+        }
+        
+        .post-divider {
+            border: 0;
+            height: 1px;
+            background: #e0e0e0;
+            margin: 2rem 0;
+        }
+        
+        .post-content pre {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .post-content code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #f5f5f5;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        #postsResults {
+            margin-top: 2rem;
+        }
+    </style>
 </head>
 <body>
 
@@ -15,7 +261,7 @@
     
     <!-- Search Form -->
     <div class="card">
-        <form id="mediaSearchForm" class="form" onsubmit="return false;">
+        <form id="mediaSearchForm" class="form">
             <div class="form-group">
                 <label class="label" for="mediaUrl">URL da Mídia (opcional)</label>
                 <input type="text" id="mediaUrl" name="mediaUrl" 
@@ -47,12 +293,42 @@
             <!-- Results will be dynamically added here -->
         </div>
     </div>
+
+    <!-- Create Posts Section -->
+    <div class="card mt-4">
+        <h3 class="title">Criar Posts</h3>
+        <form id="createPostsForm" class="form">
+            <div class="form-group">
+                <label class="label" for="userInput">Descrição do Conteúdo</label>
+                <textarea id="userInput" name="userInput" 
+                    class="input textarea"
+                    placeholder="Descreva o conteúdo que você deseja criar..."
+                    rows="4"></textarea>
+            </div>
+
+            <button type="submit" class="btn">
+                <i class="ph ph-pencil-line"></i>
+                Criar Posts
+            </button>
+        </form>
+    </div>
+
+    <!-- Posts Results Section -->
+    <div id="postsResults" class="results hidden">
+        <h3 class="title">Posts Gerados</h3>
+        <div id="postsContent" style="white-space: pre-wrap; font-family: monospace; padding: 20px;"></div>
+    </div>
 </div>
 
-<script src="https://unpkg.com/phosphor-icons"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
-<script src="/static/js/media.js"></script>
+    <!-- External libraries first -->
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
+    <!-- Custom scripts last -->
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/create_post.js"></script>
+    <script src="/static/js/media.js"></script>
+    <script src="/static/js/dashboard.js"></script>
 </body>
 </html>

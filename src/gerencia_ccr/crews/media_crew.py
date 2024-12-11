@@ -1,97 +1,60 @@
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task, before_kickoff, after_kickoff
-from crewai_tools import DallETool
+from crewai_tools import SerperDevTool, ScrapeWebsiteTool
+from dotenv import load_dotenv
+from datetime import datetime
+from pydantic import BaseModel, Field
 
 import os
 
-dalle_tool = DallETool(model="dall-e-3",
-                       size="1024x1024",
-                       quality="standard",
-                       n=1)
+load_dotenv()
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+print(f"GOOGLE_API_KEY: {GOOGLE_API_KEY}")
+
+class PostModel(BaseModel):
+    title: str = Field(..., description="Title of the post"),
+    design: str = Field(..., description="Design of the post"),
+    content: str = Field(..., description="Content of the post"),
+    prompt: str = Field(..., description="VERY detailed prompt to be used on DALL-E for image generation")
+
 
 @CrewBase
 class MediaCrew():
-    """MediaCrew for processing and categorizing religious content"""
+    """MediaCrew for creating religious content for Instagram posts and stories"""
 
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
-    # gemini_pro=LLM(
-    #     model="gemini/gemini-1.5-pro",
-    #     max_rpm=2
-    # )
 
     def __init__(self):
-        self.llm = LLM(
+        self.gemini_flash = LLM(
             model="gemini/gemini-1.5-flash"
         )
-
+        self.gemini_pro = LLM(
+            model="gemini/gemini-1.5-pro",
+            api_key=GOOGLE_API_KEY,
+            max_rpm=2
+        )
+        self.gpt_4o = LLM(
+            model="gpt-4o"
+        )
+        self.gpt_4o_mini = LLM(
+            model="gpt-4o-mini"
+        )
+        
     @after_kickoff
     def log_results(self, output):
-        print(f"Content Processing Results: {output}")
+        print("\n\n=== MediaCrew after kickoff ===")
+        print(f"MediaCrew after kickoff: {output}")
+        print("=== MediaCrew after kickoff ===\n\n")
+
         return output
 
-    def media_manager_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config['media_manager_agent'],
-            allow_delegation=True,
-            llm=self.llm,
-            verbose=True
-        )
-
     @agent
-    def receiver_agent(self) -> Agent:
+    def research_agent(self) -> Agent:
         return Agent(
-            config=self.agents_config['receiver_agent'],
-            llm=self.llm,
-            verbose=True
-        )
-
-    @agent
-    def bible_expert(self) -> Agent:
-        return Agent(
-            config=self.agents_config['bible_expert'],
-            llm=self.llm,
-            verbose=True
-        )
-
-    @agent
-    def summarizer(self) -> Agent:
-        return Agent(
-            config=self.agents_config['summarizer'],
-            llm=self.llm,
-            verbose=True
-        )
-
-    @agent
-    def instagram_stories_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config['instagram_stories_agent'],
-            llm=self.llm,
-            verbose=True
-        )
-
-    @agent
-    def instagram_posts_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config['instagram_posts_agent'],
-            llm=self.llm,
-            verbose=True
-        )
-
-    @agent
-    def designer_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config['designer_agent'],
-            llm=self.llm,
-            verbose=True
-        )
-
-    @agent
-    def image_creator_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config['image_creator_agent'],
-            llm=self.llm,
-            tools=[dalle_tool],
+            config=self.agents_config['research_agent'],
+            llm=self.gpt_4o_mini,
+            tools=[SerperDevTool(), ScrapeWebsiteTool()],
             verbose=True
         )
 
@@ -99,17 +62,58 @@ class MediaCrew():
     def editor_agent(self) -> Agent:
         return Agent(
             config=self.agents_config['editor_agent'],
-            llm=self.llm,
+            llm=self.gemini_flash,
+            verbose=True
+        )
+
+    @agent
+    def bible_expert(self) -> Agent:
+        return Agent(
+            config=self.agents_config['bible_expert'],
+            llm=self.gemini_flash,
+            verbose=True
+        )
+
+    @agent
+    def summarizer(self) -> Agent:
+        return Agent(
+            config=self.agents_config['summarizer'],
+            llm=self.gemini_flash,
+            verbose=True
+        )
+
+    @agent
+    def instagram_stories_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config['instagram_stories_agent'],
+            llm=self.gemini_flash,
+            verbose=True
+        )
+
+    @agent
+    def instagram_posts_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config['instagram_posts_agent'],
+            llm=self.gemini_flash,
             verbose=True
         )
 
     @task
-    def classify_content(self) -> Task:
-        task_config = self.tasks_config['classify_content']
+    def research(self) -> Task:
+        task_config = self.tasks_config['research']
         return Task(
             description=task_config['description'],
             expected_output=task_config['expected_output'],
-            agent=self.receiver_agent()
+            agent=self.research_agent()
+        )
+
+    @task
+    def create_summary(self) -> Task:
+        task_config = self.tasks_config['create_summary']
+        return Task(
+            description=task_config['description'],
+            expected_output=task_config['expected_output'],
+            agent=self.summarizer()
         )
 
     @task
@@ -122,12 +126,12 @@ class MediaCrew():
         )
 
     @task
-    def summarize_content(self) -> Task:
-        task_config = self.tasks_config['create_summary']
+    def create_caption(self) -> Task:
+        task_config = self.tasks_config['create_caption']
         return Task(
             description=task_config['description'],
             expected_output=task_config['expected_output'],
-            agent=self.summarizer()
+            agent=self.editor_agent(),
         )
 
     @task
@@ -136,7 +140,9 @@ class MediaCrew():
         return Task(
             description=task_config['description'],
             expected_output=task_config['expected_output'],
-            agent=self.instagram_stories_agent()
+            agent=self.instagram_stories_agent(),
+            output_format=PostModel,
+            output_file=f"/posts/story_{datetime.now().strftime('%Y-%m-%d_%H%M%S')}.md"
         )
 
     @task
@@ -145,43 +151,17 @@ class MediaCrew():
         return Task(
             description=task_config['description'],
             expected_output=task_config['expected_output'],
-            agent=self.instagram_posts_agent()
-        )
-
-    @task
-    def generate_image_prompt(self) -> Task:
-        task_config = self.tasks_config['generate_image_prompt']
-        return Task(
-            description=task_config['description'],
-            expected_output=task_config['expected_output'],
-            agent=self.designer_agent()
-        )
-
-    @task
-    def create_image(self) -> Task:
-        task_config = self.tasks_config['create_image']
-        return Task(
-            description=task_config['description'],
-            expected_output=task_config['expected_output'],
-            agent=self.image_creator_agent()
-        )
-
-    @task
-    def create_caption(self) -> Task:
-        task_config = self.tasks_config['create_caption']
-        return Task(
-            description=task_config['description'],
-            expected_output=task_config['expected_output'],
-            agent=self.editor_agent()
+            agent=self.instagram_posts_agent(),
+            output_format=PostModel,
+            output_file=f"/posts/post_{datetime.now().strftime('%Y-%m-%d_%H%M%S')}.md",
         )
 
     @crew
     def media_crew(self) -> Crew:
-        """Creates the MediaCrew for content processing"""
+        """Creates the MediaCrew that will generate content for Instagram stories and posts"""
         return Crew(
             agents=self.agents,
             tasks=self.tasks,
             verbose=True,
-            process=Process.hierarchical,
-            manager_agent=self.media_manager_agent()
+            process=Process.sequential
         )

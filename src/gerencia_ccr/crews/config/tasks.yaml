@@ -58,12 +58,37 @@ classify_content:
     - category: The determined content type
     - explanation: Reasoning behind the classification
     - recommended_agents: List of agents available on your crewthat should process this content
+      
+research:
+  description: >
+    Generate a detailed theological research based on the provided content: {content}
+    Search and scrape the web for relevant information on trends for what kind of posts and approcahes are resulting more currently.
+    According to the findings of the research, generate a detailed theological research.
+  expected_output: >
+    A detailed theological research containing:
+    - Main points
+    - Example of findings
+    - Practical applications
+
+create_summary:
+  description: >
+    Create a concise summary of the content that captures the main points,
+    key scriptures, and central message. Include any action items or
+    practical applications mentioned.
+    Content: {content}
+  expected_output: >
+    A structured summary containing:
+    - Main theme
+    - Key points
+    - Scripture references
+    - Practical applications
 
 verify_biblical_content:
   description: >
     Review the content for biblical accuracy and provide theological insights.
     Verify any scripture references, doctrinal statements, or theological concepts.
     Identify any areas that need clarification or correction.
+    Content: {content}
   expected_output: >
     A detailed analysis including:
     - Biblical accuracy assessment
@@ -71,17 +96,21 @@ verify_biblical_content:
     - Theological insights
     - Any recommended clarifications
 
-create_summary:
+create_caption:
   description: >
-    Create a concise summary of the content that captures the main points,
-    key scriptures, and central message. Include any action items or
-    practical applications mentioned.
+    Create an engaging caption that:
+    1. Incorporates relevant Bible verse(s)
+    2. Includes compelling call-to-action
+    3. Uses appropriate hashtags
+    4. Maintains brand voice
+    Content: {content}
   expected_output: >
-    A structured summary containing:
-    - Main theme
-    - Key points
-    - Scripture references
-    - Practical applications
+    A complete caption package containing:
+    - Main caption text
+    - Bible verse reference
+    - Call-to-action
+    - Relevant hashtags
+  context: [verify_biblical_content, create_summary]
 
 create_instagram_story:
   description: >
@@ -92,11 +121,12 @@ create_instagram_story:
     4. Call-to-action elements
     Content: {content}
   expected_output: >
-    A detailed Instagram Story plan containing:
-    - Story structure and flow
-    - Interactive element details
-    - Visual style specifications
-    - Engagement elements
+    A complete Instagram Story plan IN PORTUGUESE, containing a very detailed and easy to read markdown format (WITHOUT ``` tags) as per:
+    - Post title
+    - Post design
+    - Post content
+    - Prompt for DALL-E image generation (EN and PT)
+  context: [create_caption]
 
 create_instagram_post:
   description: >
@@ -107,11 +137,12 @@ create_instagram_post:
     4. Engagement strategy
     Content: {content}
   expected_output: >
-    A complete Instagram Post plan containing:
-    - Post type and format
-    - Content structure
-    - Visual requirements
-    - Engagement elements
+    A complete Instagram Post plan IN PORTUGUESE, containing a very detailed and easy to read markdown format (WITHOUT ``` tags) as per:
+    - Post title
+    - Post design
+    - Post content
+    - Prompt for DALL-E image generation (EN and PT)
+  context: [create_caption]
 
 generate_image_prompt:
   description: >
@@ -141,18 +172,3 @@ create_image:
     - Image dimensions
     - Style confirmation
     - Quality assessment
-
-create_caption:
-  description: >
-    Create an engaging caption that:
-    1. Incorporates relevant Bible verse(s)
-    2. Includes compelling call-to-action
-    3. Uses appropriate hashtags
-    4. Maintains brand voice
-    Content: {content}
-  expected_output: >
-    A complete caption package containing:
-    - Main caption text
-    - Bible verse reference
-    - Call-to-action
-    - Relevant hashtags

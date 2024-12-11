@@ -20,10 +20,18 @@ class InfantilSearch {
 
     initializeDatePickers() {
         console.log('Initializing date pickers');
-        flatpickr.localize(flatpickr.l10ns.pt);
+        // Ensure Portuguese localization is set
+        if (flatpickr.l10ns.pt) {
+            flatpickr.setDefaults({ locale: flatpickr.l10ns.pt });
+        }
+
         const commonConfig = {
             dateFormat: 'Y-m-d',
-            theme: 'light'
+            theme: 'dark',
+            disableMobile: true,
+            allowInput: false,
+            clickOpens: true,
+            time_24hr: true
         };
         
         flatpickr('#startDate', commonConfig);

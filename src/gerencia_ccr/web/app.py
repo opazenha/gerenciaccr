@@ -109,8 +109,8 @@ def serve_static_root(filename):
     return send_from_directory(app.static_folder, filename)
 
 # Initialize routes
-init_auth_routes(app, mongo_client)
-init_reservation_routes(app, mongo_client)
+init_auth_routes(app, mongo_client['gerenciaccr'])
+init_reservation_routes(app, mongo_client['gerenciaccr'])
 video_bp = init_video_routes(mongo_client['gerenciaccr'].services)
 app.register_blueprint(video_bp)
 init_infantil_routes(app, mongo_client['gerenciaccr'].services)

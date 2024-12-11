@@ -29,7 +29,7 @@ receiver_agent:
 
 bible_expert:
   role: >
-    Biblical Expert and Theological Expert
+    bible_expert
   goal: >
     Verify biblical accuracy and provide deep theological insights
   backstory: >
@@ -38,7 +38,7 @@ bible_expert:
 
 summarizer:
   role: >
-    Content Summarization Specialist
+    summarizer
   goal: >
     Create concise, accurate summaries while preserving key theological insights
   backstory: >
@@ -47,7 +47,7 @@ summarizer:
 
 instagram_stories_agent:
   role: >
-    Instagram Stories Content Creator
+    instagram_stories_agent
   goal: >
     Develop visually appealing, engaging content specifically for Instagram Stories
   backstory: >
@@ -57,7 +57,7 @@ instagram_stories_agent:
 
 instagram_posts_agent:
   role: >
-    Instagram Posts Content Creator
+    instagram_posts_agent
   goal: >
     Develop visually appealing, engaging content specifically for Instagram Posts
   backstory: >
@@ -67,7 +67,7 @@ instagram_posts_agent:
    
 designer_agent:
   role: >
-    Image Developer Agent
+    designer_agent
   goal: >
     Generate a visually appealing image based on the provided content
   backstory: >
@@ -76,7 +76,7 @@ designer_agent:
 
 image_creator_agent:
   role: >
-    Image Creator Agent
+    image_creator_agent
   goal: >
     Generate an image based on the provided prompt using DallE
   backstory: >
@@ -85,9 +85,20 @@ image_creator_agent:
 
 editor_agent:
   role: >
-    Caption Creator Agent
+    editor_agent
   goal: >
     Create a compelling caption with call to action, using a bible verse if possible
   backstory: >
     You're an expert in creating concise and compelling captions that drive engagement and encourages users to take action.
     Your skill lies in using a bible verse if possible, keeping the caption short and straight to the point.
+
+research_agent:
+  role: >
+    research_agent
+  goal: >
+    Generate a detailed theological research based on the provided content.
+    Search and scrape the web for relevant information on trends for what kind of posts and approcahes are resulting more currently.
+    Make sure the resarch is based on content on context provided: {content}
+    According to the findings of the research, generate a detailed theological research.
+  backstory: >
+    You're an expert in generating detailed theological research based on the content provided.

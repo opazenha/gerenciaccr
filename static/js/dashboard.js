@@ -61,54 +61,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 mainContent.innerHTML = html;
             }
 
-            // Load required script based on template
-            let scriptPath = null;
-            if (templatePath.includes('reservas.html')) {
-                scriptPath = '/static/js/reservas.js';
-            } else if (templatePath.includes('video.html')) {
-                scriptPath = '/static/js/video.js';
-            } else if (templatePath.includes('pregacoes.html')) {
-                scriptPath = '/static/js/pregacoes.js';
-            } else if (templatePath.includes('media.html')) {
-                scriptPath = '/static/js/media.js';
-            } else if (templatePath.includes('infantil.html')) {
-                scriptPath = '/static/js/infantil.js';
-            }
+            // Load required scripts based on template
+            if (templatePath.includes('media.html')) {
+                try {
+                    // Remove existing scripts to ensure clean initialization
+                    const existingScripts = document.querySelectorAll('script[src*="/static/js/"]');
+                    existingScripts.forEach(script => script.remove());
 
-            if (scriptPath) {
-                // Remove any existing script
-                const existingScript = document.querySelector(`script[src="${scriptPath}"]`);
-                if (existingScript) {
-                    existingScript.remove();
+                    // Load scripts in sequence and wait for them to be ready
+                    await loadScript('/static/js/auth.js');
+                    await loadScript('/static/js/media.js');
+                    await loadScript('/static/js/create_post.js');
+                    
+                    // Initialize after ensuring scripts are loaded
+                    const checkAndInitialize = () => {
+                        if (typeof PostsCreator === 'undefined') {
+                            console.log('Waiting for PostsCreator to be defined...');
+                            setTimeout(checkAndInitialize, 100);
+                        } else {
+                            console.log('PostsCreator found, initializing...');
+                            if (!window.postsCreator) {
+                                window.postsCreator = new PostsCreator();
+                            }
+                        }
+                    };
+                    checkAndInitialize();
+                } catch (error) {
+                    console.error('Error initializing media scripts:', error);
                 }
-
-                // Load and execute the new script
-                const script = document.createElement('script');
-                script.src = scriptPath;
-                script.onload = () => {
-                    // Initialize component after script is loaded
-                    if (templatePath.includes('reservas.html')) {
-                        new ReservationForm();
-                    } else if (templatePath.includes('video.html')) {
-                        new VideoProcessor();
-                    } else if (templatePath.includes('pregacoes.html')) {
-                        new SermonSearch();
-                    } else if (templatePath.includes('media.html')) {
-                        new MediaSearch();
-                    } else if (templatePath.includes('infantil.html')) {
-                        new InfantilSearch();
-                    }
-                };
-                document.body.appendChild(script);
+            } else if (templatePath.includes('reservas.html')) {
+                await loadScript('/static/js/reservas.js');
+                new ReservationForm();
+            } else if (templatePath.includes('video.html')) {
+                await loadScript('/static/js/video.js');
+            } else if (templatePath.includes('pregacoes.html')) {
+                await loadScript('/static/js/pregacoes.js');
+            } else if (templatePath.includes('infantil.html')) {
+                await loadScript('/static/js/infantil.js');
             }
         } catch (error) {
             console.error('Error loading template:', error);
             if (contentArea) {
-                contentArea.innerHTML = '<p class="error">Error loading content</p>';
-            } else if (mainContent) {
-                mainContent.innerHTML = '<p class="error">Error loading content</p>';
+                contentArea.innerHTML = '<p class="error">Error loading content. Please try again.</p>';
             }
         }
+    }
+
+    // Helper function to load scripts
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            // Check if script is already loaded
+            if (document.querySelector(`script[src="${src}"]`)) {
+                console.log(`Script ${src} already loaded`);
+                resolve();
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = () => {
+                console.log(`Script ${src} loaded successfully`);
+                resolve();
+            };
+            script.onerror = (error) => {
+                console.error(`Error loading script ${src}:`, error);
+                reject(error);
+            };
+            document.body.appendChild(script);
+        });
     }
 
     // Handle logout
